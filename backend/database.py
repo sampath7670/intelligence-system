@@ -10,7 +10,9 @@ from config.config import DATABASE_URL
 
 # SQLite needs connect_args={"check_same_thread": False} for multi-threaded/FastAPI requests
 engine = create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
+    DATABASE_URL,
+    connect_args={"check_same_thread": False} if DATABASE_URL.startswith("sqlite:") else {},
+    pool_pre_ping=True,
 )
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

@@ -1,0 +1,1026 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Intelligent Networking Assistant | AI-Powered RAG & Verification</title>
+  <meta name="description" content="AI-powered assistant for personalized professional communication, RAG, and knowledge verification." />
+
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <style>
+    :root {
+      --bg-primary: #090d16;
+      --bg-secondary: #0f172a;
+      --bg-card: #1e293b;
+      --bg-card-hover: #26334d;
+      --accent-primary: #6366f1;
+      --accent-secondary: #a855f7;
+      --accent-pink: #ec4899;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --border-color: #334155;
+      --success-bg: rgba(34, 197, 94, 0.15);
+      --success-text: #4ade80;
+      --warning-bg: rgba(234, 179, 8, 0.15);
+      --warning-text: #facc15;
+      --danger-bg: rgba(239, 68, 68, 0.15);
+      --danger-text: #f87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background-color: var(--bg-primary);
+      color: var(--text-main);
+      display: flex;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Sidebar Navigation */
+    aside {
+      width: 280px;
+      background-color: var(--bg-secondary);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 18px;
+      position: fixed;
+      height: 100vh;
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .brand-icon {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: white;
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+    }
+
+    .brand-text h2 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a5b4fc, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .brand-text p {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    /* User Active Persona Widget */
+    .persona-widget {
+      background: rgba(30, 41, 59, 0.7);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 20px;
+    }
+
+    .persona-widget label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .persona-widget select {
+      width: 100%;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 8px 10px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 500;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .nav-item:hover {
+      background: rgba(99, 102, 241, 0.1);
+      color: #a5b4fc;
+    }
+
+    .nav-item.active {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
+      border: 1px solid rgba(99, 102, 241, 0.4);
+      color: white;
+      font-weight: 600;
+    }
+
+    .nav-item i {
+      width: 20px;
+      text-align: center;
+      font-size: 1.05rem;
+    }
+
+    /* Main Content Area */
+    main {
+      margin-left: 280px;
+      flex: 1;
+      padding: 32px 40px;
+      max-width: 1200px;
+    }
+
+    .page-section {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .page-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header-title {
+      font-size: 2.2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 6px;
+    }
+
+    .header-subtitle {
+      color: var(--text-muted);
+      font-size: 1rem;
+      margin-bottom: 28px;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+    }
+
+    /* Card Styling */
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 22px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transition: border-color 0.2s, transform 0.2s;
+    }
+
+    .card:hover {
+      border-color: rgba(99, 102, 241, 0.4);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #e2e8f0;
+    }
+
+    /* Form Controls */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+    }
+
+    .form-control {
+      width: 100%;
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .form-control:focus {
+      border-color: var(--accent-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 90px;
+    }
+
+    .btn {
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      color: white;
+      border: none;
+      padding: 11px 20px;
+      border-radius: 8px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .btn:hover {
+      opacity: 0.92;
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(0);
+    }
+
+    .btn-secondary {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    /* Badges & Tags */
+    .badge {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-verified {
+      background: var(--success-bg);
+      color: var(--success-text);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .badge-partial {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+
+    .badge-unverified {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    /* Output Boxes */
+    .output-box {
+      background: #0f172a;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      color: #f1f5f9;
+      margin-bottom: 14px;
+    }
+
+    .rationale-box {
+      background: rgba(99, 102, 241, 0.1);
+      border-left: 3px solid var(--accent-primary);
+      padding: 12px 16px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      margin-bottom: 14px;
+    }
+
+    .citation-card {
+      background: rgba(15, 23, 42, 0.6);
+      border-left: 3px solid var(--accent-secondary);
+      padding: 10px 14px;
+      margin-top: 8px;
+      border-radius: 0 6px 6px 0;
+      font-size: 0.85rem;
+    }
+
+    /* Stat Cards */
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 18px;
+      text-align: center;
+    }
+
+    .stat-val {
+      font-size: 2rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a5b4fc, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .stat-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Checkbox & File Upload */
+    .checkbox-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+    }
+
+    .checkbox-group input {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent-primary);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside>
+    <div class="brand">
+      <div class="brand-icon"><i class="fa-solid fa-handshake"></i></div>
+      <div class="brand-text">
+        <h2>Networking AI</h2>
+        <p>RAG & Knowledge Assistant</p>
+      </div>
+    </div>
+
+    <div class="persona-widget">
+      <label><i class="fa-solid fa-user-gear"></i> Active Persona</label>
+      <select id="activePersonaSelect" onchange="onPersonaChange()">
+        <option value="">Loading personas...</option>
+      </select>
+    </div>
+
+    <ul class="nav-list">
+      <li class="nav-item active" onclick="switchTab('generator')">
+        <i class="fa-solid fa-comments"></i> Generator
+      </li>
+      <li class="nav-item" onclick="switchTab('verification')">
+        <i class="fa-solid fa-shield-halved"></i> Verification
+      </li>
+      <li class="nav-item" onclick="switchTab('repository')">
+        <i class="fa-solid fa-book-open"></i> Knowledge Repo
+      </li>
+      <li class="nav-item" onclick="switchTab('personas')">
+        <i class="fa-solid fa-id-card"></i> Persona Manager
+      </li>
+      <li class="nav-item" onclick="switchTab('recommendations')">
+        <i class="fa-solid fa-lightbulb"></i> Recommendations
+      </li>
+      <li class="nav-item" onclick="switchTab('analytics')">
+        <i class="fa-solid fa-chart-line"></i> Analytics & Evaluation
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- SECTION 1: PROFESSIONAL GENERATOR -->
+    <section id="generator" class="page-section active">
+      <h1 class="header-title">Personalized Professional Generator</h1>
+      <p class="header-subtitle">Generate RAG-grounded, persona-conditioned professional communications with Explainable AI rationales.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="card-title"><i class="fa-solid fa-sliders"></i> Message Parameters</h2>
+          <form id="genForm" onsubmit="handleGenerate(event)">
+            <div class="form-group">
+              <label>Conversation Modality</label>
+              <select id="genModality" class="form-control">
+                <option value="linkedin_invitation">LinkedIn Connection Request (&lt;300 chars)</option>
+                <option value="follow_up_email">Post-Event / Meeting Follow-up Email</option>
+                <option value="interview_reply">Interview Thank-You & STAR Technical Response</option>
+                <option value="technical_discussion">Technical Discussion Contribution</option>
+                <option value="event_icebreaker">Conference & Event Icebreakers</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Recipient Name</label>
+              <input type="text" id="genRecipientName" class="form-control" value="Alex Morgan" required />
+            </div>
+
+            <div class="form-group">
+              <label>Recipient Role / Title</label>
+              <input type="text" id="genRecipientRole" class="form-control" value="Senior AI Engineering Director" required />
+            </div>
+
+            <div class="form-group">
+              <label>Core Topic / Shared Context</label>
+              <input type="text" id="genTopic" class="form-control" value="Retrieval-Augmented Generation & Distributed AI" required />
+            </div>
+
+            <div class="form-group">
+              <label>Optional Niche Context / Personal Details</label>
+              <textarea id="genNotes" class="form-control" placeholder="e.g. We briefly spoke at the AI summit regarding vector search latency."></textarea>
+            </div>
+
+            <div class="checkbox-group">
+              <input type="checkbox" id="genUseRag" checked />
+              <label for="genUseRag">Ground in Knowledge Repository (RAG with FAISS + BM25)</label>
+            </div>
+
+            <button type="submit" class="btn"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Verified Message</button>
+          </form>
+        </div>
+
+        <div>
+          <div class="card" id="genResultCard">
+            <h2 class="card-title"><i class="fa-solid fa-paper-plane"></i> Generated Output</h2>
+            <div id="genOutputPlaceholder" style="color: var(--text-muted); font-size: 0.9rem;">
+              Fill out the parameters and click <strong>Generate Verified Message</strong> to produce tailored professional communications.
+            </div>
+
+            <div id="genResultContent" style="display: none;">
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                <h3 id="genResultTitle" style="font-size: 1rem; color: #a855f7;"></h3>
+                <span id="genResultBadge" class="badge"></span>
+              </div>
+              <div id="genResultText" class="output-box"></div>
+              <div id="genResultRationale" class="rationale-box"></div>
+              <div id="genResultCitations"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 2: KNOWLEDGE VERIFICATION -->
+    <section id="verification" class="page-section">
+      <h1 class="header-title">Knowledge Verification Engine</h1>
+      <p class="header-subtitle">Audit technical claims and statements against internal documents and Wikipedia with semantic similarity & confidence scoring.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="card-title"><i class="fa-solid fa-magnifying-glass"></i> Audit Claim</h2>
+          <form onsubmit="handleVerify(event)">
+            <div class="form-group">
+              <label>Claim / Assertion to Verify</label>
+              <textarea id="verifyClaim" class="form-control" style="min-height: 120px;" required>Retrieval-Augmented Generation grounds large language models in verified external documents to reduce hallucinations.</textarea>
+            </div>
+
+            <div class="checkbox-group">
+              <input type="checkbox" id="verifyCheckWiki" checked />
+              <label for="verifyCheckWiki">Query Wikipedia for external validation</label>
+            </div>
+
+            <button type="submit" class="btn"><i class="fa-solid fa-shield-check"></i> Run Verification Engine</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title"><i class="fa-solid fa-clipboard-check"></i> Verification Result</h2>
+          <div id="verifyPlaceholder" style="color: var(--text-muted); font-size: 0.9rem;">
+            Submit a claim on the left to inspect factual verification scores and citations.
+          </div>
+
+          <div id="verifyResultContent" style="display: none;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
+              <span id="verifyBadge" class="badge"></span>
+              <span id="verifyConfidence" style="font-size: 0.9rem; color: #a5b4fc; font-weight: 600;"></span>
+            </div>
+            <div id="verifyJustification" class="rationale-box"></div>
+            <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: #e2e8f0;">Retrieved Evidence & Citations:</h4>
+            <div id="verifyCitations"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 3: KNOWLEDGE REPOSITORY -->
+    <section id="repository" class="page-section">
+      <h1 class="header-title">Knowledge Repository & Vector Search</h1>
+      <p class="header-subtitle">Upload organizational documents (PDF, DOCX, PPTX, TXT) and execute hybrid vector search.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="card-title"><i class="fa-solid fa-cloud-arrow-up"></i> Ingest Document</h2>
+          <form onsubmit="handleUploadDoc(event)">
+            <div class="form-group">
+              <label>Choose File (.pdf, .docx, .pptx, .txt)</label>
+              <input type="file" id="uploadFileInput" class="form-control" required />
+            </div>
+            <button type="submit" class="btn"><i class="fa-solid fa-file-import"></i> Parse & Index Document</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title"><i class="fa-solid fa-magnifying-glass-vector"></i> Hybrid Vector Search</h2>
+          <form onsubmit="handleSearch(event)">
+            <div class="form-group">
+              <label>Search Query / Concept</label>
+              <input type="text" id="searchQuery" class="form-control" value="Transformer architecture and latency" required />
+            </div>
+            <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-search"></i> Execute Search</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><i class="fa-solid fa-folder-tree"></i> Ingested Documents & Results</h2>
+        <div id="repoDocsList">Loading documents...</div>
+      </div>
+    </section>
+
+    <!-- SECTION 4: PERSONA MANAGER -->
+    <section id="personas" class="page-section">
+      <h1 class="header-title">User Persona Manager</h1>
+      <p class="header-subtitle">Define user profiles to steer personalized tone, technical background, and networking objectives.</p>
+
+      <div class="grid-2">
+        <div class="card">
+          <h2 class="card-title"><i class="fa-solid fa-user-plus"></i> Create New Profile</h2>
+          <form onsubmit="handleCreateUser(event)">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" id="uName" class="form-control" value="Jane Doe" required />
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="uEmail" class="form-control" value="jane.doe@example.com" />
+            </div>
+            <div class="form-group">
+              <label>Professional Role</label>
+              <select id="uRole" class="form-control">
+                <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+                <option value="Software Engineer">Software Engineer</option>
+                <option value="AI Researcher">AI Researcher</option>
+                <option value="Product Manager">Product Manager</option>
+                <option value="Engineering Lead / Director">Engineering Lead / Director</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Experience Level</label>
+              <select id="uLevel" class="form-control">
+                <option value="Senior">Senior</option>
+                <option value="Mid-Level">Mid-Level</option>
+                <option value="Junior">Junior</option>
+                <option value="Lead / Principal">Lead / Principal</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Technical Background / Stack</label>
+              <input type="text" id="uTech" class="form-control" value="Python, PyTorch, Go, Cloud Architecture" required />
+            </div>
+            <div class="form-group">
+              <label>Networking Objective</label>
+              <input type="text" id="uGoal" class="form-control" value="Research Collaboration & Career Growth" required />
+            </div>
+            <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Save Profile</button>
+          </form>
+        </div>
+
+        <div class="card">
+          <h2 class="card-title"><i class="fa-solid fa-users"></i> Existing Profiles</h2>
+          <div id="usersList">Loading profiles...</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION 5: RECOMMENDATIONS -->
+    <section id="recommendations" class="page-section">
+      <h1 class="header-title">Smart Networking Recommendations</h1>
+      <p class="header-subtitle">Proactive topics, connection strategies, and questions adapted to your active persona.</p>
+
+      <div id="recsContent" class="grid-2">Loading recommendations...</div>
+    </section>
+
+    <!-- SECTION 6: ANALYTICS & BENCHMARK -->
+    <section id="analytics" class="page-section">
+      <h1 class="header-title">Analytics & Objective Evaluation</h1>
+      <p class="header-subtitle">Track platform metrics and compute BLEU, chrF, and ROUGE benchmark scores.</p>
+
+      <div class="grid-4" id="statsGrid" style="margin-bottom: 24px;">
+        <div class="stat-card"><div class="stat-val" id="statConvos">0</div><div class="stat-label">Conversations</div></div>
+        <div class="stat-card"><div class="stat-val" id="statSat">100%</div><div class="stat-label">Satisfaction</div></div>
+        <div class="stat-card"><div class="stat-val" id="statChunks">0</div><div class="stat-label">Chunks Indexed</div></div>
+        <div class="stat-card"><div class="stat-val" id="statConf">90%</div><div class="stat-label">Avg Confidence</div></div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title"><i class="fa-solid fa-flask-vial"></i> Live NLP Benchmark Evaluator (SacreBLEU / chrF / ROUGE)</h2>
+        <form onsubmit="handleBenchmark(event)">
+          <div class="form-group">
+            <label>Candidate Text to Benchmark</label>
+            <textarea id="benchText" class="form-control" required>Hi Alex, I came across your work on distributed AI systems and found your recent architecture insights compelling. I would love to connect and follow your journey.</textarea>
+          </div>
+          <div class="form-group">
+            <label>Benchmark Domain</label>
+            <select id="benchDomain" class="form-control">
+              <option value="linkedin_invitation">LinkedIn Invitation</option>
+              <option value="follow_up_email">Follow-Up Email</option>
+              <option value="interview_reply">Interview Response</option>
+              <option value="technical_discussion">Technical Discussion</option>
+            </select>
+          </div>
+          <button type="submit" class="btn"><i class="fa-solid fa-calculator"></i> Compute NLP Metrics</button>
+        </form>
+
+        <div id="benchResults" style="margin-top: 18px; display: none;">
+          <div class="grid-4" style="margin-bottom: 14px;">
+            <div class="stat-card"><div class="stat-val" id="mBleu">0</div><div class="stat-label">SacreBLEU</div></div>
+            <div class="stat-card"><div class="stat-val" id="mChrf">0</div><div class="stat-label">chrF F-Score</div></div>
+            <div class="stat-card"><div class="stat-val" id="mRouge1">0%</div><div class="stat-label">ROUGE-1</div></div>
+            <div class="stat-card"><div class="stat-val" id="mRougeL">0%</div><div class="stat-label">ROUGE-L</div></div>
+          </div>
+          <div id="benchInterp" class="rationale-box"></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
+
+      event.currentTarget.classList.add('active');
+      document.getElementById(tabId).classList.add('active');
+
+      if (tabId === 'repository') loadDocuments();
+      if (tabId === 'personas') loadUsers();
+      if (tabId === 'recommendations') loadRecommendations();
+      if (tabId === 'analytics') loadAnalytics();
+    }
+
+    // Global State
+    let currentUsers = [];
+    let activeUserId = null;
+
+    // Load Users on Init
+    async function loadUsers() {
+      try {
+        const res = await fetch('/api/users');
+        if (!res.ok) return;
+        currentUsers = await res.json();
+
+        const sel = document.getElementById('activePersonaSelect');
+        sel.innerHTML = currentUsers.map(u =>
+          `<option value="${u.id}">${u.name} (${u.role})</option>`
+        ).join('');
+
+        if (currentUsers.length > 0 && !activeUserId) {
+          activeUserId = currentUsers[0].id;
+        }
+
+        // Populate users list in Persona tab
+        const listDiv = document.getElementById('usersList');
+        if (listDiv) {
+          listDiv.innerHTML = currentUsers.map(u => `
+            <div class="card" style="margin-bottom: 12px; padding: 14px;">
+              <h4 style="color: #a855f7; margin-bottom: 4px;">${u.name}</h4>
+              <p style="font-size: 0.85rem; color: #cbd5e1;"><strong>Role:</strong> ${u.role} (${u.experience_level})</p>
+              <p style="font-size: 0.85rem; color: #94a3b8;"><strong>Goal:</strong> ${u.networking_goal}</p>
+            </div>
+          `).join('');
+        }
+      } catch (err) {
+        console.error("Failed to load users:", err);
+      }
+    }
+
+    function onPersonaChange() {
+      const sel = document.getElementById('activePersonaSelect');
+      activeUserId = parseInt(sel.value);
+    }
+
+    // Generate Conversation
+    async function handleGenerate(e) {
+      e.preventDefault();
+      const payload = {
+        user_id: activeUserId,
+        conversation_type: document.getElementById('genModality').value,
+        recipient_name: document.getElementById('genRecipientName').value,
+        recipient_role: document.getElementById('genRecipientRole').value,
+        topic: document.getElementById('genTopic').value,
+        specific_note: document.getElementById('genNotes').value,
+        use_rag: document.getElementById('genUseRag').checked
+      };
+
+      try {
+        const res = await fetch('/api/conversations/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+
+        document.getElementById('genOutputPlaceholder').style.display = 'none';
+        document.getElementById('genResultContent').style.display = 'block';
+
+        document.getElementById('genResultTitle').innerText = data.title;
+        document.getElementById('genResultText').innerText = data.generated_content;
+        document.getElementById('genResultRationale').innerText = '💡 Explainable Rationale: ' + data.rationale;
+
+        const status = data.verification_status || 'VERIFIED';
+        const badge = document.getElementById('genResultBadge');
+        badge.innerText = `${status} (${Math.round(data.confidence_score * 100)}%)`;
+        badge.className = 'badge ' + (status === 'VERIFIED' ? 'badge-verified' : status === 'PARTIALLY_SUPPORTED' ? 'badge-partial' : 'badge-unverified');
+
+        const citDiv = document.getElementById('genResultCitations');
+        if (data.sources && data.sources.length > 0) {
+          citDiv.innerHTML = '<h4 style="font-size:0.88rem; margin-top:10px;">Corroborated Citations:</h4>' +
+            data.sources.map(s => `<div class="citation-card"><strong>📌 ${s.source || s.name || 'Doc'}</strong>: "${s.snippet || ''}"</div>`).join('');
+        } else {
+          citDiv.innerHTML = '';
+        }
+      } catch (err) {
+        alert('Generation error: ' + err.message);
+      }
+    }
+
+    // Verification
+    async function handleVerify(e) {
+      e.preventDefault();
+      const payload = {
+        claim: document.getElementById('verifyClaim').value,
+        check_wiki: document.getElementById('verifyCheckWiki').checked
+      };
+
+      try {
+        const res = await fetch('/api/verify/knowledge', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+
+        document.getElementById('verifyPlaceholder').style.display = 'none';
+        document.getElementById('verifyResultContent').style.display = 'block';
+
+        const badge = document.getElementById('verifyBadge');
+        badge.innerText = 'Verdict: ' + data.verdict;
+        badge.className = 'badge ' + (data.verdict === 'VERIFIED' ? 'badge-verified' : data.verdict === 'PARTIALLY_SUPPORTED' ? 'badge-partial' : 'badge-unverified');
+
+        document.getElementById('verifyConfidence').innerText = `Confidence: ${data.confidence_pct}%`;
+        document.getElementById('verifyJustification').innerText = '💡 ' + data.explanation;
+
+        const citDiv = document.getElementById('verifyCitations');
+        if (data.sources && data.sources.length > 0) {
+          citDiv.innerHTML = data.sources.map(s => `
+            <div class="citation-card">
+              <strong>${s.type}: ${s.name}</strong> (Match: ${Math.round(s.similarity * 100)}%)<br>
+              <em>"${s.snippet}"</em>
+            </div>
+          `).join('');
+        } else {
+          citDiv.innerHTML = '<p style="font-size:0.85rem; color:var(--text-muted);">No explicit source citations found.</p>';
+        }
+      } catch (err) {
+        alert('Verification error: ' + err.message);
+      }
+    }
+
+    // Load Documents
+    async function loadDocuments() {
+      try {
+        const res = await fetch('/api/knowledge/documents');
+        if (!res.ok) return;
+        const docs = await res.json();
+        const listDiv = document.getElementById('repoDocsList');
+        if (docs.length === 0) {
+          listDiv.innerHTML = '<p style="color:var(--text-muted);">No documents indexed yet.</p>';
+          return;
+        }
+        listDiv.innerHTML = docs.map(d => `
+          <div style="background:#0f172a; border:1px solid var(--border-color); padding:12px 16px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <strong style="color:#a5b4fc;">📄 ${d.filename}</strong>
+              <span style="font-size:0.8rem; color:var(--text-muted); margin-left:10px;">${d.chunk_count} chunks • ${d.file_type.toUpperCase()}</span>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Upload Document
+    async function handleUploadDoc(e) {
+      e.preventDefault();
+      const fileInput = document.getElementById('uploadFileInput');
+      if (!fileInput.files[0]) return;
+      const formData = new FormData();
+      formData.append('file', fileInput.files[0]);
+
+      try {
+        const res = await fetch('/api/knowledge/upload', {
+          method: 'POST',
+          body: formData
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+        alert(data.message);
+        loadDocuments();
+      } catch (err) {
+        alert('Upload failed: ' + err.message);
+      }
+    }
+
+    // Hybrid Vector Search
+    async function handleSearch(e) {
+      e.preventDefault();
+      const query = document.getElementById('searchQuery').value;
+      try {
+        const res = await fetch('/api/knowledge/search', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: query, top_k: 3, hybrid: true })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const results = await res.json();
+        const listDiv = document.getElementById('repoDocsList');
+        listDiv.innerHTML = '<h4 style="margin-bottom:12px;">Search Results:</h4>' + results.map((r, i) => `
+          <div class="card" style="margin-bottom:10px;">
+            <h4 style="color:#a855f7; font-size:0.95rem;">#${i+1} ${r.document_name} (Chunk ${r.chunk_index})</h4>
+            <p style="font-size:0.88rem; margin:6px 0;">${r.text}</p>
+            <span class="badge badge-verified">RRF Score: ${r.rrf_score.toFixed(4)}</span>
+          </div>
+        `).join('');
+      } catch (err) {
+        alert('Search error: ' + err.message);
+      }
+    }
+
+    // Load Create User
+    async function handleCreateUser(e) {
+      e.preventDefault();
+      const payload = {
+        name: document.getElementById('uName').value,
+        email: document.getElementById('uEmail').value,
+        role: document.getElementById('uRole').value,
+        experience_level: document.getElementById('uLevel').value,
+        technical_background: document.getElementById('uTech').value,
+        networking_goal: document.getElementById('uGoal').value
+      };
+
+      try {
+        const res = await fetch('/api/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        alert('User profile created!');
+        loadUsers();
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    }
+
+    // Load Recommendations
+    async function loadRecommendations() {
+      try {
+        const res = await fetch(`/api/recommendations?user_id=${activeUserId || ''}`);
+        if (!res.ok) return;
+        const recs = await res.json();
+        const div = document.getElementById('recsContent');
+        div.innerHTML = `
+          <div class="card">
+            <h3 class="card-title" style="color:#818cf8;"><i class="fa-solid fa-bullseye"></i> Discussion Topics</h3>
+            ${(recs.recommended_topics || []).map(t => `
+              <div style="background:#0f172a; padding:10px; border-radius:6px; margin-bottom:8px;">
+                <strong style="color:#e2e8f0;">${t.title}</strong>
+                <p style="font-size:0.82rem; color:var(--text-muted);">${t.reason}</p>
+              </div>
+            `).join('')}
+          </div>
+          <div class="card">
+            <h3 class="card-title" style="color:#c084fc;"><i class="fa-solid fa-comments-dollar"></i> Proven Starters</h3>
+            ${(recs.proven_starters || []).map(s => `
+              <div style="background:#0f172a; padding:10px; border-radius:6px; margin-bottom:8px; font-style:italic;">
+                "${s}"
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Load Analytics
+    async function loadAnalytics() {
+      try {
+        const res = await fetch('/api/analytics/overview');
+        if (!res.ok) return;
+        const stats = await res.json();
+        document.getElementById('statConvos').innerText = stats.total_conversations || 0;
+        document.getElementById('statSat').innerText = (stats.satisfaction_rate || 100) + '%';
+        document.getElementById('statChunks').innerText = stats.total_chunks || 0;
+        document.getElementById('statConf').innerText = (stats.average_confidence || 90) + '%';
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    // Benchmark
+    async function handleBenchmark(e) {
+      e.preventDefault();
+      const payload = {
+        candidate_text: document.getElementById('benchText').value,
+        conversation_type: document.getElementById('benchDomain').value
+      };
+      try {
+        const res = await fetch('/api/evaluation/benchmark', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const data = await res.json();
+
+        document.getElementById('benchResults').style.display = 'block';
+        document.getElementById('mBleu').innerText = data.bleu;
+        document.getElementById('mChrf').innerText = data.chrf;
+        document.getElementById('mRouge1').innerText = data.rouge1 + '%';
+        document.getElementById('mRougeL').innerText = data.rougeL + '%';
+        document.getElementById('benchInterp').innerText = '📊 Benchmark Analysis: ' + data.interpretation;
+      } catch (err) {
+        alert('Benchmark error: ' + err.message);
+      }
+    }
+
+    // Init
+    loadUsers();
+  </script>
+</body>
+</html>

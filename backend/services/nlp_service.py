@@ -1,8 +1,16 @@
 import re
 import logging
 from typing import List, Dict, Any, Optional
-import torch
-from transformers import AutoTokenizer, AutoModel, pipeline
+try:
+    import torch
+    from transformers import AutoTokenizer, AutoModel, pipeline
+    HAS_TRANSFORMERS = True
+except ImportError:
+    HAS_TRANSFORMERS = False
+    torch = None
+    AutoTokenizer = None
+    AutoModel = None
+    pipeline = None
 
 logger = logging.getLogger(__name__)
 
@@ -38,6 +46,11 @@ class NLPService:
     def load_models(self):
         """Lazy load NLP models to save startup time and memory."""
         if self.models_loaded or self.use_fallback:
+            return
+
+        if not HAS_TRANSFORMERS:
+            logger.info("Transformers/Torch not installed. Using template-based heuristic generator.")
+            self.use_fallback = True
             return
 
         try:

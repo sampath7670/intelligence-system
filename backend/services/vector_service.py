@@ -3,7 +3,12 @@ import re
 import logging
 import numpy as np
 from typing import List, Dict, Any, Optional
-import faiss
+try:
+    import faiss
+    HAS_FAISS = True
+except ImportError:
+    HAS_FAISS = False
+    faiss = None
 from rank_bm25 import BM25Okapi
 from sqlalchemy.orm import Session
 from backend.models.models import DocumentChunk, KnowledgeDocument
@@ -19,6 +24,7 @@ class VectorService:
         self.bm25_index = None
         self.chunk_metadata: List[Dict[str, Any]] = []
         self.tokenized_corpus: List[List[str]] = []
+        self.embeddings_matrix: Optional[np.ndarray] = None
         self.is_initialized = False
         self.use_fallback = False
 
@@ -88,7 +94,9 @@ class VectorService:
         self.tokenized_corpus = []
 
         if not chunks:
-            self.faiss_index = faiss.IndexFlatIP(self.dimension)
+            if HAS_FAISS and faiss is not None:
+                self.faiss_index = faiss.IndexFlatIP(self.dimension)
+            self.embeddings_matrix = np.zeros((0, self.dimension), dtype=np.float32)
             self.bm25_index = None
             self.is_initialized = True
             logger.info("Vector & BM25 indexes initialized with 0 chunks.")
@@ -108,39 +116,56 @@ class VectorService:
             })
             self.tokenized_corpus.append(self.tokenize_text(c.text_content))
 
-        # Build dense embeddings and FAISS index
+        # Build dense embeddings
         embeddings = self.encode(texts)
-        self.faiss_index = faiss.IndexFlatIP(self.dimension)
-        self.faiss_index.add(embeddings)
+        self.embeddings_matrix = embeddings
+
+        if HAS_FAISS and faiss is not None:
+            self.faiss_index = faiss.IndexFlatIP(self.dimension)
+            self.faiss_index.add(embeddings)
+        else:
+            self.faiss_index = None
 
         # Build BM25 index
         if self.tokenized_corpus:
             self.bm25_index = BM25Okapi(self.tokenized_corpus)
 
         self.is_initialized = True
-        logger.info(f"Rebuilt FAISS index with {len(chunks)} chunks and BM25 corpus.")
+        logger.info(f"Rebuilt index with {len(chunks)} chunks and BM25 corpus.")
 
     def search(self, db: Session, query: str, top_k: int = 4, hybrid: bool = True) -> List[Dict[str, Any]]:
         """
-        Execute hybrid search (FAISS dense semantic search + BM25 keyword search)
+        Execute hybrid search (FAISS/NumPy dense semantic search + BM25 keyword search)
         using Reciprocal Rank Fusion (RRF).
         """
-        if not self.is_initialized or self.faiss_index is None:
+        if not self.is_initialized or (self.faiss_index is None and self.embeddings_matrix is None):
             self.rebuild_index(db)
 
         if not self.chunk_metadata or not query.strip():
             return []
 
         k = min(top_k * 2, len(self.chunk_metadata))
-        
-        # 1. Dense Semantic Search (FAISS)
+
+        # 1. Dense Semantic Search
         query_emb = self.encode([query])
-        dense_distances, dense_indices = self.faiss_index.search(query_emb, k)
-        
+
+        if HAS_FAISS and self.faiss_index is not None:
+            dense_distances, dense_indices = self.faiss_index.search(query_emb, k)
+            d_dists = dense_distances[0]
+            d_idxs = dense_indices[0]
+        else:
+            # NumPy inner product vector search
+            scores = np.dot(self.embeddings_matrix, query_emb.T).flatten()
+            top_indices = np.argsort(scores)[::-1][:k]
+            d_dists = scores[top_indices]
+            d_idxs = top_indices
+
         dense_ranks: Dict[int, int] = {}
-        for rank, idx in enumerate(dense_indices[0]):
+        idx_to_dist: Dict[int, float] = {}
+        for rank, (dist, idx) in enumerate(zip(d_dists, d_idxs)):
             if idx != -1 and idx < len(self.chunk_metadata):
                 dense_ranks[idx] = rank + 1
+                idx_to_dist[idx] = float(dist)
 
         # 2. Sparse Keyword Search (BM25)
         bm25_ranks: Dict[int, int] = {}
@@ -166,8 +191,8 @@ class VectorService:
             rrf_score = (1.0 / (rrf_k + r_dense)) + (1.0 / (rrf_k + r_bm25))
 
             # Retrieve base similarity for score calibration
-            dense_dist = float(dense_distances[0][list(dense_indices[0]).index(idx)]) if idx in dense_indices[0] else 0.0
-            
+            dense_dist = idx_to_dist.get(idx, 0.0)
+
             meta = self.chunk_metadata[idx]
             scored_candidates.append({
                 "chunk_id": meta["chunk_id"],

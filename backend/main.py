@@ -67,16 +67,40 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routes
+# Include API routes
 app.include_router(api_router)
 
+from fastapi import Request
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, HTMLResponse
+
+# Mount static files and frontend UI
+STATIC_DIR = ROOT_DIR / "frontend" / "static"
+if STATIC_DIR.exists():
+    app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
+
 @app.get("/")
-def home():
+def serve_frontend(request: Request):
+    accept = request.headers.get("accept", "")
+    index_file = STATIC_DIR / "index.html"
+
+    # Return HTML web app if browser requests text/html, otherwise return JSON status for API clients
+    if index_file.exists() and "text/html" in accept:
+        try:
+            content = index_file.read_text(encoding="utf-8")
+            return HTMLResponse(content=content)
+        except Exception:
+            return FileResponse(index_file)
+
     return {
         "message": "Intelligent Networking Assistant API is running.",
         "docs_url": "/docs",
         "version": "2.0.0"
     }
+
+@app.get("/api/health")
+def health_check():
+    return {"status": "ok", "version": "2.0.0"}
 
 if __name__ == "__main__":
     import uvicorn

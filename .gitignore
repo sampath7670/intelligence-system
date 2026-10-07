@@ -1,5 +1,10 @@
 # Virtual environment
 venv/
+.venv/
+.vercel/
+.pytest_cache/
+.env
+.env.*
 ENV/
 env/
 
@@ -16,3 +21,5 @@ networking_assistant.db
 # OS generated files
 .DS_Store
 Thumbs.db
+
+.vercel
