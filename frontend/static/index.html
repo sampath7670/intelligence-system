@@ -3,526 +3,148 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Intelligent Networking Assistant | AI-Powered RAG & Verification</title>
+  <title>Networkwise | Your networking workspace</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
   <meta name="description" content="AI-powered assistant for personalized professional communication, RAG, and knowledge verification." />
 
   <!-- Google Fonts & Font Awesome Icons -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;450;500;550;600;650;700&family=Manrope:wght@400;500;600;650;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
 
-  <style>
-    :root {
-      --bg-primary: #090d16;
-      --bg-secondary: #0f172a;
-      --bg-card: #1e293b;
-      --bg-card-hover: #26334d;
-      --accent-primary: #6366f1;
-      --accent-secondary: #a855f7;
-      --accent-pink: #ec4899;
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --border-color: #334155;
-      --success-bg: rgba(34, 197, 94, 0.15);
-      --success-text: #4ade80;
-      --warning-bg: rgba(234, 179, 8, 0.15);
-      --warning-text: #facc15;
-      --danger-bg: rgba(239, 68, 68, 0.15);
-      --danger-text: #f87171;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Outfit', sans-serif;
-      background-color: var(--bg-primary);
-      color: var(--text-main);
-      display: flex;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-
-    /* Sidebar Navigation */
-    aside {
-      width: 280px;
-      background-color: var(--bg-secondary);
-      border-right: 1px solid var(--border-color);
-      display: flex;
-      flex-direction: column;
-      padding: 24px 18px;
-      position: fixed;
-      height: 100vh;
-      z-index: 100;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .brand-icon {
-      width: 42px;
-      height: 42px;
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.25rem;
-      color: white;
-      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
-    }
-
-    .brand-text h2 {
-      font-size: 1.15rem;
-      font-weight: 700;
-      background: linear-gradient(135deg, #a5b4fc, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .brand-text p {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
-    /* User Active Persona Widget */
-    .persona-widget {
-      background: rgba(30, 41, 59, 0.7);
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 12px;
-      margin-bottom: 20px;
-    }
-
-    .persona-widget label {
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      color: var(--accent-primary);
-      letter-spacing: 0.5px;
-      margin-bottom: 6px;
-      display: block;
-    }
-
-    .persona-widget select {
-      width: 100%;
-      background: var(--bg-primary);
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 8px 10px;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      font-family: inherit;
-      outline: none;
-    }
-
-    .nav-list {
-      list-style: none;
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      flex: 1;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: 10px;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-size: 0.92rem;
-      font-weight: 500;
-      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .nav-item:hover {
-      background: rgba(99, 102, 241, 0.1);
-      color: #a5b4fc;
-    }
-
-    .nav-item.active {
-      background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(168, 85, 247, 0.2));
-      border: 1px solid rgba(99, 102, 241, 0.4);
-      color: white;
-      font-weight: 600;
-    }
-
-    .nav-item i {
-      width: 20px;
-      text-align: center;
-      font-size: 1.05rem;
-    }
-
-    /* Main Content Area */
-    main {
-      margin-left: 280px;
-      flex: 1;
-      padding: 32px 40px;
-      max-width: 1200px;
-    }
-
-    .page-section {
-      display: none;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-
-    .page-section.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(6px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .header-title {
-      font-size: 2.2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 6px;
-    }
-
-    .header-subtitle {
-      color: var(--text-muted);
-      font-size: 1rem;
-      margin-bottom: 28px;
-    }
-
-    /* Grid Layouts */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-    }
-
-    .grid-4 {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 18px;
-    }
-
-    /* Card Styling */
-    .card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 14px;
-      padding: 22px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-      transition: border-color 0.2s, transform 0.2s;
-    }
-
-    .card:hover {
-      border-color: rgba(99, 102, 241, 0.4);
-    }
-
-    .card-title {
-      font-size: 1.15rem;
-      font-weight: 700;
-      margin-bottom: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      color: #e2e8f0;
-    }
-
-    /* Form Controls */
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #cbd5e1;
-      margin-bottom: 6px;
-    }
-
-    .form-control {
-      width: 100%;
-      background: #0f172a;
-      border: 1px solid var(--border-color);
-      color: var(--text-main);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 0.92rem;
-      font-family: inherit;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .form-control:focus {
-      border-color: var(--accent-primary);
-      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-    }
-
-    textarea.form-control {
-      resize: vertical;
-      min-height: 90px;
-    }
-
-    .btn {
-      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-      color: white;
-      border: none;
-      padding: 11px 20px;
-      border-radius: 8px;
-      font-size: 0.92rem;
-      font-weight: 600;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: opacity 0.2s, transform 0.1s;
-    }
-
-    .btn:hover {
-      opacity: 0.92;
-      transform: translateY(-1px);
-    }
-
-    .btn:active {
-      transform: translateY(0);
-    }
-
-    .btn-secondary {
-      background: #334155;
-      color: #e2e8f0;
-    }
-
-    /* Badges & Tags */
-    .badge {
-      display: inline-block;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .badge-verified {
-      background: var(--success-bg);
-      color: var(--success-text);
-      border: 1px solid rgba(34, 197, 94, 0.3);
-    }
-
-    .badge-partial {
-      background: var(--warning-bg);
-      color: var(--warning-text);
-      border: 1px solid rgba(234, 179, 8, 0.3);
-    }
-
-    .badge-unverified {
-      background: var(--danger-bg);
-      color: var(--danger-text);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-    }
-
-    /* Output Boxes */
-    .output-box {
-      background: #0f172a;
-      border: 1px solid var(--border-color);
-      border-radius: 10px;
-      padding: 16px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.9rem;
-      line-height: 1.6;
-      white-space: pre-wrap;
-      color: #f1f5f9;
-      margin-bottom: 14px;
-    }
-
-    .rationale-box {
-      background: rgba(99, 102, 241, 0.1);
-      border-left: 3px solid var(--accent-primary);
-      padding: 12px 16px;
-      border-radius: 0 8px 8px 0;
-      font-size: 0.88rem;
-      color: #cbd5e1;
-      margin-bottom: 14px;
-    }
-
-    .citation-card {
-      background: rgba(15, 23, 42, 0.6);
-      border-left: 3px solid var(--accent-secondary);
-      padding: 10px 14px;
-      margin-top: 8px;
-      border-radius: 0 6px 6px 0;
-      font-size: 0.85rem;
-    }
-
-    /* Stat Cards */
-    .stat-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 18px;
-      text-align: center;
-    }
-
-    .stat-val {
-      font-size: 2rem;
-      font-weight: 800;
-      background: linear-gradient(135deg, #a5b4fc, #c084fc);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .stat-label {
-      font-size: 0.82rem;
-      color: var(--text-muted);
-      margin-top: 4px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Checkbox & File Upload */
-    .checkbox-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-      font-size: 0.88rem;
-      color: #cbd5e1;
-    }
-
-    .checkbox-group input {
-      width: 16px;
-      height: 16px;
-      accent-color: var(--accent-primary);
-    }
-  </style>
+  <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
+  <a class="skip-link" href="#main-content">Skip to content</a>
 
   <!-- Sidebar -->
-  <aside>
+  <aside aria-label="Workspace navigation">
     <div class="brand">
-      <div class="brand-icon"><i class="fa-solid fa-handshake"></i></div>
+      <div class="brand-icon"><i class="fa-solid fa-circle-nodes"></i></div>
       <div class="brand-text">
-        <h2>Networking AI</h2>
-        <p>RAG & Knowledge Assistant</p>
+        <h2>network<span>wise</span><span class="brand-dot">.</span></h2>
+        <p>MEANINGFUL CONNECTIONS</p>
       </div>
     </div>
 
     <div class="persona-widget">
-      <label><i class="fa-solid fa-user-gear"></i> Active Persona</label>
+      <label for="activePersonaSelect">YOUR WORKSPACE</label>
       <select id="activePersonaSelect" onchange="onPersonaChange()">
         <option value="">Loading personas...</option>
       </select>
     </div>
 
+    <div class="nav-label">CREATE & CONNECT</div>
     <ul class="nav-list">
-      <li class="nav-item active" onclick="switchTab('generator')">
-        <i class="fa-solid fa-comments"></i> Generator
+      <li class="nav-item active" data-tab="generator" role="button" tabindex="0" onclick="switchTab('generator')" onkeydown="if(event.key === 'Enter' || event.key === ' '){event.preventDefault();switchTab('generator')}">
+        <i class="fa-solid fa-comments"></i> Message studio
       </li>
-      <li class="nav-item" onclick="switchTab('verification')">
-        <i class="fa-solid fa-shield-halved"></i> Verification
+      <li class="nav-item" data-tab="verification" role="button" tabindex="0" onclick="switchTab('verification')" onkeydown="if(event.key === 'Enter' || event.key === ' '){event.preventDefault();switchTab('verification')}">
+        <i class="fa-solid fa-shield-halved"></i> Fact check
       </li>
-      <li class="nav-item" onclick="switchTab('repository')">
-        <i class="fa-solid fa-book-open"></i> Knowledge Repo
+      <li class="nav-item" data-tab="repository" role="button" tabindex="0" onclick="switchTab('repository')" onkeydown="if(event.key === 'Enter' || event.key === ' '){event.preventDefault();switchTab('repository')}">
+        <i class="fa-solid fa-book-open"></i> Knowledge library
       </li>
-      <li class="nav-item" onclick="switchTab('personas')">
-        <i class="fa-solid fa-id-card"></i> Persona Manager
+      <li class="nav-item" data-tab="personas" role="button" tabindex="0" onclick="switchTab('personas')" onkeydown="if(event.key === 'Enter' || event.key === ' '){event.preventDefault();switchTab('personas')}">
+        <i class="fa-solid fa-id-card"></i> Your profiles
       </li>
-      <li class="nav-item" onclick="switchTab('recommendations')">
+      <li class="nav-item" data-tab="recommendations" role="button" tabindex="0" onclick="switchTab('recommendations')" onkeydown="if(event.key === 'Enter' || event.key === ' '){event.preventDefault();switchTab('recommendations')}">
         <i class="fa-solid fa-lightbulb"></i> Recommendations
       </li>
-      <li class="nav-item" onclick="switchTab('analytics')">
-        <i class="fa-solid fa-chart-line"></i> Analytics & Evaluation
+      <li class="nav-item" data-tab="analytics" role="button" tabindex="0" onclick="switchTab('analytics')" onkeydown="if(event.key === 'Enter' || event.key === ' '){event.preventDefault();switchTab('analytics')}">
+        <i class="fa-solid fa-chart-line"></i> Insights & evaluation
       </li>
     </ul>
+    <div class="sidebar-note"><span class="note-icon"><i class="fa-regular fa-lightbulb"></i></span><h3>A little context goes a long way.</h3><p>Add a shared interest or a moment from your last conversation.</p></div>
+    <div class="sidebar-footer"><span class="avatar">N</span><div>Make your next connection count.<small>Your personal networking workspace</small></div></div>
   </aside>
 
   <!-- Main Content -->
-  <main>
+  <main id="main-content">
+    <header class="topbar"><div><span class="breadcrumb">Workspace</span><span class="breadcrumb-divider">/</span><span id="currentPage">Message studio</span></div><span class="workspace-tag"><span></span> Personal workspace</span></header>
 
     <!-- SECTION 1: PROFESSIONAL GENERATOR -->
     <section id="generator" class="page-section active">
-      <h1 class="header-title">Personalized Professional Generator</h1>
-      <p class="header-subtitle">Generate RAG-grounded, persona-conditioned professional communications with Explainable AI rationales.</p>
+      <div class="eyebrow">A GOOD CONVERSATION STARTS HERE</div><h1 class="header-title">Open doors.<br>Start with the <span>right words.</span></h1>
+      <p class="header-subtitle">Turn a little context into a thoughtful message. Make every introduction feel like you.</p>
 
-      <div class="grid-2">
-        <div class="card">
-          <h2 class="card-title"><i class="fa-solid fa-sliders"></i> Message Parameters</h2>
+      <div class="format-heading"><span>What would you like to write?</span><span>01 / Choose a format</span></div>
+      <div class="format-grid" role="group" aria-label="Message format">
+        <button type="button" class="format-option selected" data-format="linkedin_invitation" onclick="chooseFormat(this.dataset.format)" aria-pressed="true"><i class="fa-brands fa-linkedin-in"></i><span>LinkedIn invite<small>Make the first move</small></span><span class="format-check">✓</span></button>
+        <button type="button" class="format-option" data-format="follow_up_email" onclick="chooseFormat(this.dataset.format)" aria-pressed="false"><i class="fa-regular fa-envelope"></i><span>Follow-up email<small>Keep it going</small></span><span class="format-check">✓</span></button>
+        <button type="button" class="format-option" data-format="interview_reply" onclick="chooseFormat(this.dataset.format)" aria-pressed="false"><i class="fa-solid fa-briefcase"></i><span>Interview reply<small>Leave an impression</small></span><span class="format-check">✓</span></button>
+        <button type="button" class="format-option" data-format="event_icebreaker" onclick="chooseFormat(this.dataset.format)" aria-pressed="false"><i class="fa-regular fa-comment-dots"></i><span>Icebreaker<small>Find common ground</small></span><span class="format-check">✓</span></button>
+      </div>
+      <div class="grid-2 studio-grid">
+        <div class="card compose-card">
+          <div class="card-heading"><h2 class="card-title">Set the scene</h2><span class="step-label">02 / Add context</span></div><p class="card-description">The details that make your message personal.</p>
           <form id="genForm" onsubmit="handleGenerate(event)">
             <div class="form-group">
-              <label>Conversation Modality</label>
-              <select id="genModality" class="form-control">
-                <option value="linkedin_invitation">LinkedIn Connection Request (&lt;300 chars)</option>
-                <option value="follow_up_email">Post-Event / Meeting Follow-up Email</option>
-                <option value="interview_reply">Interview Thank-You & STAR Technical Response</option>
-                <option value="technical_discussion">Technical Discussion Contribution</option>
-                <option value="event_icebreaker">Conference & Event Icebreakers</option>
+              <label>Message type</label>
+              <select id="genModality" class="form-control" onchange="chooseFormat(this.value)">
+                <option value="linkedin_invitation">LinkedIn connection request</option>
+                <option value="follow_up_email">Follow-up email</option>
+                <option value="interview_reply">Interview thank-you</option>
+                <option value="technical_discussion">Technical discussion</option>
+                <option value="event_icebreaker">Event icebreaker</option>
               </select>
             </div>
 
             <div class="form-group">
-              <label>Recipient Name</label>
+              <label>Who are you writing to?</label>
               <input type="text" id="genRecipientName" class="form-control" value="Alex Morgan" required />
             </div>
 
             <div class="form-group">
-              <label>Recipient Role / Title</label>
-              <input type="text" id="genRecipientRole" class="form-control" value="Senior AI Engineering Director" required />
+              <label>Their role</label>
+              <input type="text" id="genRecipientRole" class="form-control" value="AI Engineering Director" required />
             </div>
 
             <div class="form-group">
-              <label>Core Topic / Shared Context</label>
-              <input type="text" id="genTopic" class="form-control" value="Retrieval-Augmented Generation & Distributed AI" required />
+              <label>What connects you?</label>
+              <input type="text" id="genTopic" class="form-control" value="Building better AI products" required />
             </div>
 
             <div class="form-group">
-              <label>Optional Niche Context / Personal Details</label>
+              <label>A personal touch <span class="optional">optional</span></label>
               <textarea id="genNotes" class="form-control" placeholder="e.g. We briefly spoke at the AI summit regarding vector search latency."></textarea>
             </div>
 
             <div class="checkbox-group">
               <input type="checkbox" id="genUseRag" checked />
-              <label for="genUseRag">Ground in Knowledge Repository (RAG with FAISS + BM25)</label>
+              <label for="genUseRag">Use knowledge library for supporting context</label>
             </div>
 
-            <button type="submit" class="btn"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Verified Message</button>
+            <button type="submit" id="generateButton" class="btn generate-button"><i class="fa-solid fa-wand-magic-sparkles"></i> Create my message <i class="fa-solid fa-arrow-right"></i></button><p class="form-footnote">A starting point for a conversation that’s uniquely yours.</p><p id="generateError" class="form-error" role="alert" hidden></p>
           </form>
         </div>
 
         <div>
           <div class="card" id="genResultCard">
-            <h2 class="card-title"><i class="fa-solid fa-paper-plane"></i> Generated Output</h2>
-            <div id="genOutputPlaceholder" style="color: var(--text-muted); font-size: 0.9rem;">
-              Fill out the parameters and click <strong>Generate Verified Message</strong> to produce tailored professional communications.
-            </div>
+            <div class="card-heading"><h2 class="card-title">Your next conversation</h2><span class="draft-label">DRAFT PREVIEW</span></div>
+            <div id="genOutputPlaceholder" class="preview-placeholder"><div class="letter-illustration" aria-hidden="true"><div class="letter-paper"><span></span><span></span><span></span><b>hello.</b></div><div class="letter-envelope"></div><div class="letter-spark">✦</div></div><h3>Good things start with hello.</h3><p>Your personalized message will appear here.<br>Add your details, and let’s break the ice.</p><div class="preview-pills"><span><i class="fa-regular fa-user"></i> Your voice</span><span><i class="fa-regular fa-circle-check"></i> Thoughtful context</span></div></div>
 
             <div id="genResultContent" style="display: none;">
               <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
-                <h3 id="genResultTitle" style="font-size: 1rem; color: #a855f7;"></h3>
+                <h3 id="genResultTitle" style="font-size: 1rem; color: #267064;"></h3>
                 <span id="genResultBadge" class="badge"></span>
               </div>
-              <div id="genResultText" class="output-box"></div>
+              <div id="genResultText" class="output-box" aria-live="polite"></div><button class="btn btn-secondary copy-button" type="button" onclick="copyMessage(this)"><i class="fa-regular fa-copy"></i> Copy message</button>
               <div id="genResultRationale" class="rationale-box"></div>
               <div id="genResultCitations"></div>
             </div>
           </div>
+          <div class="writing-tip"><span>✦</span><div><h3>Make it a conversation, not a pitch.</h3><p>The best messages lead with curiosity. Ask one thoughtful question and leave room for a reply.</p></div></div>
         </div>
       </div>
+      <div class="studio-footer"><span><i class="fa-regular fa-compass"></i> More connection. Less overthinking.</span><span>Written with intention. Sent by you.</span></div>
     </section>
 
     <!-- SECTION 2: KNOWLEDGE VERIFICATION -->
     <section id="verification" class="page-section">
-      <h1 class="header-title">Knowledge Verification Engine</h1>
-      <p class="header-subtitle">Audit technical claims and statements against internal documents and Wikipedia with semantic similarity & confidence scoring.</p>
+      <h1 class="header-title">A little confidence. A lot of clarity.</h1>
+      <p class="header-subtitle">Check a claim against your documents and Wikipedia before you share it.</p>
 
       <div class="grid-2">
         <div class="card">
@@ -538,7 +160,7 @@
               <label for="verifyCheckWiki">Query Wikipedia for external validation</label>
             </div>
 
-            <button type="submit" class="btn"><i class="fa-solid fa-shield-check"></i> Run Verification Engine</button>
+            <button type="submit" class="btn"><i class="fa-solid fa-shield-halved"></i> Check this claim</button>
           </form>
         </div>
 
@@ -551,10 +173,10 @@
           <div id="verifyResultContent" style="display: none;">
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px;">
               <span id="verifyBadge" class="badge"></span>
-              <span id="verifyConfidence" style="font-size: 0.9rem; color: #a5b4fc; font-weight: 600;"></span>
+              <span id="verifyConfidence" style="font-size: 0.9rem; color: #267064; font-weight: 600;"></span>
             </div>
             <div id="verifyJustification" class="rationale-box"></div>
-            <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: #e2e8f0;">Retrieved Evidence & Citations:</h4>
+            <h4 style="font-size: 0.9rem; margin-bottom: 8px; color: #243e35;">Retrieved Evidence & Citations:</h4>
             <div id="verifyCitations"></div>
           </div>
         </div>
@@ -563,43 +185,43 @@
 
     <!-- SECTION 3: KNOWLEDGE REPOSITORY -->
     <section id="repository" class="page-section">
-      <h1 class="header-title">Knowledge Repository & Vector Search</h1>
-      <p class="header-subtitle">Upload organizational documents (PDF, DOCX, PPTX, TXT) and execute hybrid vector search.</p>
+      <h1 class="header-title">Your knowledge, within reach.</h1>
+      <p class="header-subtitle">Bring your best references together. Upload a document or find the detail you need.</p>
 
       <div class="grid-2">
         <div class="card">
-          <h2 class="card-title"><i class="fa-solid fa-cloud-arrow-up"></i> Ingest Document</h2>
+          <h2 class="card-title"><i class="fa-solid fa-cloud-arrow-up"></i> Add to your library</h2>
           <form onsubmit="handleUploadDoc(event)">
             <div class="form-group">
               <label>Choose File (.pdf, .docx, .pptx, .txt)</label>
               <input type="file" id="uploadFileInput" class="form-control" required />
             </div>
-            <button type="submit" class="btn"><i class="fa-solid fa-file-import"></i> Parse & Index Document</button>
+            <button type="submit" class="btn"><i class="fa-solid fa-file-import"></i> Upload document</button>
           </form>
         </div>
 
         <div class="card">
-          <h2 class="card-title"><i class="fa-solid fa-magnifying-glass-vector"></i> Hybrid Vector Search</h2>
+          <h2 class="card-title"><i class="fa-solid fa-magnifying-glass"></i> Find something useful</h2>
           <form onsubmit="handleSearch(event)">
             <div class="form-group">
               <label>Search Query / Concept</label>
               <input type="text" id="searchQuery" class="form-control" value="Transformer architecture and latency" required />
             </div>
-            <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-search"></i> Execute Search</button>
+            <button type="submit" class="btn btn-secondary"><i class="fa-solid fa-search"></i> Search library</button>
           </form>
         </div>
       </div>
 
       <div class="card">
-        <h2 class="card-title"><i class="fa-solid fa-folder-tree"></i> Ingested Documents & Results</h2>
+        <h2 class="card-title"><i class="fa-solid fa-folder-tree"></i> Your documents & search results</h2>
         <div id="repoDocsList">Loading documents...</div>
       </div>
     </section>
 
     <!-- SECTION 4: PERSONA MANAGER -->
     <section id="personas" class="page-section">
-      <h1 class="header-title">User Persona Manager</h1>
-      <p class="header-subtitle">Define user profiles to steer personalized tone, technical background, and networking objectives.</p>
+      <h1 class="header-title">Show up as yourself.</h1>
+      <p class="header-subtitle">Create profiles that reflect your background, interests, and next big goal.</p>
 
       <div class="grid-2">
         <div class="card">
@@ -653,16 +275,16 @@
 
     <!-- SECTION 5: RECOMMENDATIONS -->
     <section id="recommendations" class="page-section">
-      <h1 class="header-title">Smart Networking Recommendations</h1>
-      <p class="header-subtitle">Proactive topics, connection strategies, and questions adapted to your active persona.</p>
+      <h1 class="header-title">Find your next talking point.</h1>
+      <p class="header-subtitle">Fresh conversation ideas and practical advice, shaped around your profile.</p>
 
       <div id="recsContent" class="grid-2">Loading recommendations...</div>
     </section>
 
     <!-- SECTION 6: ANALYTICS & BENCHMARK -->
     <section id="analytics" class="page-section">
-      <h1 class="header-title">Analytics & Objective Evaluation</h1>
-      <p class="header-subtitle">Track platform metrics and compute BLEU, chrF, and ROUGE benchmark scores.</p>
+      <h1 class="header-title">See how things are connecting.</h1>
+      <p class="header-subtitle">Explore your activity and compare message quality with reference examples.</p>
 
       <div class="grid-4" id="statsGrid" style="margin-bottom: 24px;">
         <div class="stat-card"><div class="stat-val" id="statConvos">0</div><div class="stat-label">Conversations</div></div>
@@ -710,13 +332,33 @@
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.page-section').forEach(el => el.classList.remove('active'));
 
-      event.currentTarget.classList.add('active');
+      const activeNav = document.querySelector('[data-tab="' + tabId + '"]');
+      activeNav.classList.add('active');
+      document.getElementById('currentPage').textContent = activeNav.textContent.trim();
+      document.querySelectorAll('[data-tab]').forEach(el => el.setAttribute('aria-current', el === activeNav ? 'page' : 'false'));
       document.getElementById(tabId).classList.add('active');
 
       if (tabId === 'repository') loadDocuments();
       if (tabId === 'personas') loadUsers();
       if (tabId === 'recommendations') loadRecommendations();
       if (tabId === 'analytics') loadAnalytics();
+    }
+
+    function chooseFormat(value) {
+      document.getElementById('genModality').value = value;
+      document.querySelectorAll('[data-format]').forEach(button => {
+        const selected = button.dataset.format === value;
+        button.classList.toggle('selected', selected);
+        button.setAttribute('aria-pressed', String(selected));
+      });
+    }
+
+    async function copyMessage(button) {
+      try {
+        await navigator.clipboard.writeText(document.getElementById('genResultText').textContent);
+        button.textContent = 'Copied to clipboard';
+        setTimeout(() => { button.innerHTML = '<i class="fa-regular fa-copy"></i> Copy message'; }, 2000);
+      } catch (_) { button.textContent = 'Select the message to copy it'; }
     }
 
     // Global State
@@ -744,9 +386,9 @@
         if (listDiv) {
           listDiv.innerHTML = currentUsers.map(u => `
             <div class="card" style="margin-bottom: 12px; padding: 14px;">
-              <h4 style="color: #a855f7; margin-bottom: 4px;">${u.name}</h4>
-              <p style="font-size: 0.85rem; color: #cbd5e1;"><strong>Role:</strong> ${u.role} (${u.experience_level})</p>
-              <p style="font-size: 0.85rem; color: #94a3b8;"><strong>Goal:</strong> ${u.networking_goal}</p>
+              <h4 style="color: #267064; margin-bottom: 4px;">${u.name}</h4>
+              <p style="font-size: 0.85rem; color: #56655f;"><strong>Role:</strong> ${u.role} (${u.experience_level})</p>
+              <p style="font-size: 0.85rem; color: #6c7872;"><strong>Goal:</strong> ${u.networking_goal}</p>
             </div>
           `).join('');
         }
@@ -763,6 +405,12 @@
     // Generate Conversation
     async function handleGenerate(e) {
       e.preventDefault();
+      const button = document.getElementById('generateButton');
+      const originalLabel = button.innerHTML;
+      button.disabled = true;
+      button.setAttribute('aria-busy', 'true');
+      button.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Crafting your message…';
+      document.getElementById('generateError').hidden = true;
       const payload = {
         user_id: activeUserId,
         conversation_type: document.getElementById('genModality').value,
@@ -802,7 +450,13 @@
           citDiv.innerHTML = '';
         }
       } catch (err) {
-        alert('Generation error: ' + err.message);
+        const error = document.getElementById('generateError');
+        error.textContent = 'We couldn’t create your message. Please try again.';
+        error.hidden = false;
+      } finally {
+        button.disabled = false;
+        button.removeAttribute('aria-busy');
+        button.innerHTML = originalLabel;
       }
     }
 
@@ -861,9 +515,9 @@
           return;
         }
         listDiv.innerHTML = docs.map(d => `
-          <div style="background:#0f172a; border:1px solid var(--border-color); padding:12px 16px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+          <div style="background:#f6f8f4; border:1px solid var(--border-color); padding:12px 16px; border-radius:8px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
             <div>
-              <strong style="color:#a5b4fc;">📄 ${d.filename}</strong>
+              <strong style="color:#267064;">📄 ${d.filename}</strong>
               <span style="font-size:0.8rem; color:var(--text-muted); margin-left:10px;">${d.chunk_count} chunks • ${d.file_type.toUpperCase()}</span>
             </div>
           </div>
@@ -895,7 +549,7 @@
       }
     }
 
-    // Hybrid Vector Search
+    // Find something useful
     async function handleSearch(e) {
       e.preventDefault();
       const query = document.getElementById('searchQuery').value;
@@ -910,7 +564,7 @@
         const listDiv = document.getElementById('repoDocsList');
         listDiv.innerHTML = '<h4 style="margin-bottom:12px;">Search Results:</h4>' + results.map((r, i) => `
           <div class="card" style="margin-bottom:10px;">
-            <h4 style="color:#a855f7; font-size:0.95rem;">#${i+1} ${r.document_name} (Chunk ${r.chunk_index})</h4>
+            <h4 style="color:#267064; font-size:0.95rem;">#${i+1} ${r.document_name} (Chunk ${r.chunk_index})</h4>
             <p style="font-size:0.88rem; margin:6px 0;">${r.text}</p>
             <span class="badge badge-verified">RRF Score: ${r.rrf_score.toFixed(4)}</span>
           </div>
@@ -957,8 +611,8 @@
           <div class="card">
             <h3 class="card-title" style="color:#818cf8;"><i class="fa-solid fa-bullseye"></i> Discussion Topics</h3>
             ${(recs.recommended_topics || []).map(t => `
-              <div style="background:#0f172a; padding:10px; border-radius:6px; margin-bottom:8px;">
-                <strong style="color:#e2e8f0;">${t.title}</strong>
+              <div style="background:#f6f8f4; padding:10px; border-radius:6px; margin-bottom:8px;">
+                <strong style="color:#243e35;">${t.title}</strong>
                 <p style="font-size:0.82rem; color:var(--text-muted);">${t.reason}</p>
               </div>
             `).join('')}
@@ -966,7 +620,7 @@
           <div class="card">
             <h3 class="card-title" style="color:#c084fc;"><i class="fa-solid fa-comments-dollar"></i> Proven Starters</h3>
             ${(recs.proven_starters || []).map(s => `
-              <div style="background:#0f172a; padding:10px; border-radius:6px; margin-bottom:8px; font-style:italic;">
+              <div style="background:#f6f8f4; padding:10px; border-radius:6px; margin-bottom:8px; font-style:italic;">
                 "${s}"
               </div>
             `).join('')}
@@ -1019,6 +673,13 @@
       }
     }
 
+    // Associate existing form labels with their controls.
+    document.querySelectorAll('.form-group').forEach(group => {
+      const label = group.querySelector('label');
+      const control = group.querySelector('input, select, textarea');
+      if (label && control) label.htmlFor = control.id;
+    });
+    document.querySelector('[data-tab="generator"]').setAttribute('aria-current', 'page');
     // Init
     loadUsers();
   </script>
